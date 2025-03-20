@@ -10,7 +10,7 @@ def extract_title(markdown):
             return line.strip("# ")
     raise Exception ("No Header")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     # Read the markdown file
     with open(from_path, 'r') as markdown_file:
@@ -26,6 +26,8 @@ def generate_page(from_path, template_path, dest_path):
     # Replace placeholders in template
     result_html = template_content.replace("{{ Title }}", title)
     result_html = result_html.replace("{{ Content }}", html_content)
+    result_html = result_html.replace('href="/',f'href="{basepath}')
+    result_html = result_html.replace('src="/', f'src="{basepath}')
     #dest_path = "public/blog/post.html"
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, 'w') as html_file:
@@ -343,7 +345,7 @@ def copy_images():
         except Exception as e:
             print(f"Failed to download {url}: {e}")
     
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     """print(f"Processing directory: {dir_path_content}")
     #dir_path_content = 'content' just for understanding
     # Get all entries in the current directory
@@ -378,9 +380,9 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         dest_path = os.path.join(dest_dir_path, filename)
         if os.path.isfile(from_path):
             dest_path = Path(dest_path).with_suffix(".html")
-            generate_page(from_path, template_path, dest_path)
+            generate_page(from_path, template_path, dest_path, basepath)
         else:
-            generate_pages_recursive(from_path, template_path, dest_path)
+            generate_pages_recursive(from_path, template_path, dest_path, basepath)
 
 def copy_static(source_dir, dest_dir):
 # Ensure destination directory exists (create all necessary dirs)
